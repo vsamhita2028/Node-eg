@@ -1,18 +1,18 @@
 const express = require('express');
 const http = require('http');
 const morgan = require("morgan");
-const bodyParser= require('body-parser');
-const dishesRouter = require("./Routes/dishesRouter");
-
+const dishesRouter= require('./Routes/dishesRouter');
+const promoRouter = require("./Routes/promoRouter");
+const leaderRouter =require("./Routes/leaderRouter")
 
 const hostname ='localhost';
 const port = 3000;
 
 const app= express();
 app.use(morgan('dev'));
-app.use("/dishes", dishesRouter);
-
-
+app.use("/dishes",dishesRouter);
+app.use("/promotions",promoRouter);
+app.use("/leaders",leaderRouter);
 
 //The below code is for public folder files.
 app.use(express.static(__dirname+"/public"))

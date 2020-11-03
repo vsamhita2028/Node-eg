@@ -12,6 +12,7 @@ var leaderRouter = require('./routes/leaderRouter');
 
 var mongoose = require('mongoose');
 var dishes =require('./models/dishes');
+var promotions = require("./models/promotions");
 var app = express();
 
 // view engine setup

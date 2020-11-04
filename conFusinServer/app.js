@@ -23,6 +23,33 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+function auth(req,res,next){
+  console.log(req.headers);
+  var authHeader = req.headers.authorization;
+
+  if(!authHeader){
+    console.log("You are not authenticated :(");
+    var Err = new Error("You are not authenticated :(");
+    res.setHeader('WWW-Authenticate', 'Basic');
+    res.statusCode=401;
+    next(Err);
+    return;
+  }
+  var val = new Buffer.from(authHeader.split(' ')[1], 'base64').toString().split(':');
+  var username = val[0];
+  var password = val[1];
+
+  if(username =='admin' && password == 'password'){
+    next();
+  }else{
+    var Err = new Error("You are not authorizied :(");
+    res.setHeader('WWW-Authenticate', 'Basic');
+    res.statusCode=401;
+    next(Err);
+  }
+}
+app.use(auth);
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);

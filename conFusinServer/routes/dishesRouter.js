@@ -17,7 +17,8 @@ dishRouter.route('/')
   }, (err) => next(err))
   .catch((err) => next(err));
   })
-  .post(authenticate.verifyUser,(req, res, next) => {
+  .post(authenticate.verifyUser,authenticate.verifyAdmin,(req, res, next) => {
+  
     Dishes.create(req.body)
     .then((dishes)=>{
       console.log('Dish Created ', dishes);
@@ -27,11 +28,11 @@ dishRouter.route('/')
      },(err)=>next(err))
      .catch((err)=>next(err))
 })
-  .put(authenticate.verifyUser,(req,res,next)=>{
+  .put(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
       req.statusCode= 403;
       res.end("Put is not supported on /dishes");
   })
-  .delete(authenticate.verifyUser,(req,res,next)=>{
+  .delete(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
       Dishes.remove({})
       .then((dishes)=>{
         res.statusCode = 200;
@@ -52,11 +53,11 @@ dishRouter.route('/')
     }, (err) => next(err))
     .catch((err) => next(err));
 })
-.post(authenticate.verifyUser,(req,res,next)=>{
+.post(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
     res.statusCode=403;
     res.end("Post is not supported for dishes/:dishId");
 })
-.put(authenticate.verifyUser,(req,res,next)=>{
+.put(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
     Dishes.findByIdAndUpdate(req.params.dishId,{
       $set : req.body
     },{new :true})
@@ -68,7 +69,7 @@ dishRouter.route('/')
      },(err)=>next(err))
      .catch((err)=>next(err))
 })
-.delete(authenticate.verifyUser,(req,res,next)=>{
+.delete(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
     Dishes.findByIdAndRemove(req.params.dishId)
     .then((resp)=>{
       res.statusCode = 200;
@@ -125,7 +126,7 @@ dishRouter.route('/:dishId/comments')
   req.statusCode= 403;
   res.end("Put is not supported on /dishes/comments");
 })
-.delete(authenticate.verifyUser,(req,res,next)=>{
+.delete(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
   Dishes.findById(req.params.dishId)
   .then((dishes)=>{
     if(dishes!= null){
@@ -177,6 +178,7 @@ dishRouter.route('/:dishId/comments/:commentId')
    res.end("Post is not supported for dishes/:dishId/comments/:commentId");
 })
 .put(authenticate.verifyUser,(req,res,next)=>{
+  var id1=req.user._id;
   Dishes.findById(req.params.dishId)
   .then((dish) => {
       if (dish != null && dish.comments.id(req.params.commentId) != null) {
@@ -191,9 +193,15 @@ dishRouter.route('/:dishId/comments/:commentId')
               Dishes.findById(dish._id)
               .populate('comments.author')
               .then((dish) => {
-                  res.statusCode = 200;
-                  res.setHeader('Content-Type', 'application/json');
-                  res.json(dish);  
+                  var id2 = dish.author
+                  if(id1.equals(id2)){
+                    res.statusCode = 200;
+                    res.setHeader('Content-Type', 'application/json');
+                    res.json(dish); 
+                  }else{
+                    var err = new Error("You are not authorized to perform this operation");
+                    return next(err);
+                  } 
               })              
           }, (err) => next(err));
       }
@@ -211,6 +219,7 @@ dishRouter.route('/:dishId/comments/:commentId')
   .catch((err) => next(err));
 })
 .delete(authenticate.verifyUser,(req,res,next)=>{
+  var id1=req.user._id;
   Dishes.findById(req.params.dishId)
   .then((dish) => {
       if (dish != null && dish.comments.id(req.params.commentId) != null) {
@@ -221,9 +230,12 @@ dishRouter.route('/:dishId/comments/:commentId')
               Dishes.findById(dish._id)
               .populate('comments.author')
               .then((dish) => {
+                var id2 = dish.author
+                if(id1.equals(id2)){
                   res.statusCode = 200;
                   res.setHeader('Content-Type', 'application/json');
-                  res.json(dish);  
+                  res.json(dish); 
+                }
               })               
           }, (err) => next(err));
       }

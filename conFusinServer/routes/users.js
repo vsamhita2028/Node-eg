@@ -4,8 +4,14 @@ var User = require('../models/user');
 var passport = require('passport');
 var authenticate = require('../authenticate')
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
+router.get('/', authenticate.verifyUser,authenticate.verifyAdmin,function(req, res, next) {
+  
+  User.find({})
+  .then((users)=>{
+      res.statusCode = 200;
+      res.setHeader("Content-Type","application/json")
+      res.json(users)
+  },(err)=>next(err))
 });
 
 router.post('/signup', (req, res, next) => {
@@ -31,7 +37,9 @@ router.post('/signup', (req, res, next) => {
         passport.authenticate('local')(req, res, () => {
           res.statusCode = 200;
           res.setHeader('Content-Type', 'application/json');
+          
           res.json({success: true, status: 'Registration Successful!'});
+
         });
       });
     }
@@ -42,6 +50,7 @@ router.post('/signin',passport.authenticate('local'),(req,res)=>{
   var token = authenticate.getToken({_id :req.user._id});
   res.statusCode = 200;
   res.setHeader('Content-Type', 'text/plain');
+  console.log(req.user);
   res.json({success : true,token: token, status : "You are logged in successfully!"});
 });
 

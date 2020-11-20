@@ -16,7 +16,7 @@ promoRouter.route("/")
     },(err)=>next(err))
     .catch((err)=>next(err));
 })
-.post(authenticate.verifyUser,(req,res,next)=>{
+.post(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
     Promotions.create(req.body)
     .then((promo)=>{
         res.statusCode = 200;
@@ -25,11 +25,11 @@ promoRouter.route("/")
     },(err)=>next(err))
     .catch((err)=>next(err));
 })
-.put(authenticate.verifyUser,(req,res,next)=>{
+.put(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
     res.statusCode = 403
     res.end("Put is not supported for /promotions");
 })
-.delete(authenticate.verifyUser,(req,res,next)=>{
+.delete(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
     Promotions.remove({})
     .then((promo)=>{
         res.statusCode = 200;
@@ -49,10 +49,10 @@ promoRouter.route("/:promoId")
     },(err)=>next(err))
     .catch((err)=>next(err));    
 })
-.post(authenticate.verifyUser,(req,res,next)=>{
+.post(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
     res.end("Post is not supported for promotions/:promoId")
 })
-.put(authenticate.verifyUser,(req,res,next)=>{
+.put(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
     Promotions.findByIdAndUpdate(req.params.promoId,{
         $set : req.body
     },{new : true})
@@ -63,7 +63,7 @@ promoRouter.route("/:promoId")
     },(err)=>next(err))
     .catch((err)=>next(err));    
 })
-.delete(authenticate.verifyUser,(req,res,next)=>{
+.delete(authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next)=>{
     Promotions.findByIdAndRemove(req.params.promoId)
     .then((promo)=>{
         res.statusCode=200;
